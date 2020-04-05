@@ -39,7 +39,8 @@ def plot(df, regions, xlabel, ylabel, title, x_size=25, y_size=8, log_scale='off
     if 'on' in log_scale:
         plt.yscale("log")
     plt.legend(loc="upper left", ncol=3, title="Legend", fancybox=True)
-    plt.savefig(title)
+    pic_name = [title[0] + ".jpg", title[1] + ".jpg", title[2] + ".jpg"]
+    plt.savefig(pic_name)
     plt.show()
 
 # Data import
@@ -57,10 +58,9 @@ top_countries = find_highest(df_confirmed)
 
 # Plot of top countries
 title = ["Confirmed", "Death", "Recovered"]
-xlabel = ["Data", "Data", "Data"]
-ylabel = ["Persone", "Persone", "Persone"]
-picname = [title[0]+".jpg", title[1]+".jpg", title[2]+".jpg"]
+x_label = ["Date", "Date", "Date"]
+y_label = ["People", "People", "People"]
 df = [df_confirmed, df_death, df_recovered]
 
 for i in range(len(title)):
-    plot(df[i], top_countries, xlabel[i], ylabel[i], title[i])
+    plot(df[i], top_countries, x_label[i], y_label[i], title[i])
