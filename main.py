@@ -144,7 +144,7 @@ df_top_10_per_mil = pd.DataFrame()
 for i in range(len(top_countries_confirmed)):
     df_top_10_per_mil[top_countries_confirmed[i]] = df_confirmed[top_countries_confirmed[i]] / top_countries_population[i]
 
-plot(df_top_10_per_mil, top_countries_confirmed, 'Date', 'People per milion citizen', 'Confirmed positives per milion citizen of the country')
+plot(df_top_10_per_mil, top_countries_confirmed, 'Date', 'People per milion citizens', 'Confirmed positives per milion citizens of the country')
 
 #-----------
 
