@@ -61,6 +61,8 @@ def plot(df, regions, xlabel, ylabel, title, x_size=25, y_size=10, log_scale='of
         plt.yscale("log")
     plt.legend(loc="upper left", ncol=2, title="Legend", fancybox=True)
     pic_name = title+".jpg"
+    plt.annotate('[Data source: https://github.com/CSSEGISandData/COVID-19]', (0, 0), (-140, -20), fontsize=6,
+                 xycoords='axes fraction', textcoords='offset points', va='top')
     plt.savefig(pic_name)
     plt.show()
 
@@ -86,18 +88,9 @@ df = [df_confirmed, df_death, df_recovered]
 for i in range(len(title)):
     plot(df[i], top_countries_confirmed, x_label[i], y_label[i], title[i])
 
-
-
-
-
-
 # Plots of diff and div on top countries
 df_diff_confirmed, df_div_confirmed = diff_div(df_confirmed)
 top_countries_diff_confirmed = find_highest(df_diff_confirmed)
-
-
-
-
 
 # Plot of top countries
 title = ["Diff. Confirmed", "Div. Confirmed"]
@@ -223,3 +216,18 @@ df_per_mil.columns = ['EU', 'US']
 
 plot(df_per_mil, ['EU', 'US'], xlabel='Dates', ylabel='Positives per milion people', title='EU vs. US positives per milion people')
 
+# in dev
+def linear_regression(df):
+    from sklearn.linear_model import LinearRegression
+    x = np.array(range(66,len(df)+66)).reshape(-1,1)
+    y = np.array(pd.Series(df)).reshape(-1,1)
+    model = LinearRegression().fit(x, y)
+    r_sq = model.score(x, y)
+    x_pred_y0 = - model.intercept_ / model.coef_ - (x[-1] - x[0])
+    x_pred = pd.Series(np.array(range(66, int(x_pred_y0) + 66)))
+    y_pred = int(model.coef_) * x_pred + int(model.intercept_)
+    return x_pred, y_pred, x_pred_y0
+
+df = df_confirmed.Belgium.diff()[66:]
+np.array(df_confirmed.Belgium[66:])
+x_pred, y_pred, x_pred_y0 = linear_regression(df)
