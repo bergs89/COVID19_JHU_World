@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import plotly.graph_objects as go
 
 import os
 import seaborn as sns
@@ -65,6 +66,56 @@ def plot(df, regions, xlabel, ylabel, title, x_size=25, y_size=10, log_scale='of
                  xycoords='axes fraction', textcoords='offset points', va='top')
     plt.savefig(pic_name)
     plt.show()
+
+def yesterday_date():
+    from datetime import datetime
+    now = datetime.now()
+    current_time_m = str(int(now.strftime("%m")))
+    current_time_d = str(int(now.strftime("%d"))-1)
+    current_time_y = now.strftime("%y")
+    current_time = current_time_m + str('/') + current_time_d + str('/') + current_time_y
+    return current_time
+
+### MAPS ###
+
+def df_cumulative(csv_name):
+    df = pd.read_csv(csv_name)
+    df = df.rename(columns={"Country/Region": "Country", "Province/State": "Province"})
+    current_time = yesterday_date()
+    total_list = df.groupby('Country')[current_time].sum().tolist()
+    country_list = df["Country"].tolist()
+    country_set = set(country_list)
+    country_list = list(country_set)
+    country_list.sort()
+    new_df = pd.DataFrame(list(zip(country_list, total_list)), columns=['Country', 'Total_Cases'])
+    return new_df
+
+def plotly_world_map(df, locations='Country', z='Total_Cases', title='Reported Covid-19 Cases', col_bar_title='Reported Covid-19 Cases', figname='world_positive_map.html'):
+    colors = ["#F9F9F5", "#FAFAE6", "#FCFCCB", "#FCFCAE",  "#FCF1AE", "#FCEA7D", "#FCD97D",
+              "#FCCE7D", "#FCC07D", "#FEB562", "#F9A648",  "#F98E48", "#FD8739", "#FE7519",
+              "#FE5E19", "#FA520A", "#FA2B0A", "#9B1803",  "#861604", "#651104", "#570303",]
+
+
+    fig = go.Figure(data=go.Choropleth(
+        locationmode = "country names",
+        locations = df[locations],
+        z = df[z],
+        text = df[z],
+        colorscale = colors,
+        autocolorscale=False,
+        reversescale=False,
+        colorbar_title = col_bar_title,
+    ))
+
+    fig.update_layout(
+        title_text=title,
+        geo=dict(
+            showcoastlines=True,
+        ),
+    )
+
+    fig.write_html(figname, auto_open=True)
+    return
 
 # Data import
 confirmed_name = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv"
@@ -231,3 +282,14 @@ def linear_regression(df):
 df = df_confirmed.Belgium.diff()[66:]
 np.array(df_confirmed.Belgium[66:])
 x_pred, y_pred, x_pred_y0 = linear_regression(df)
+
+
+#### MAPS ###
+
+cumulative_positive = df_cumulative(confirmed_name)
+cumulative_death = df_cumulative(death_name)
+cumulative_recovered = df_cumulative(recovered_name)
+
+plotly_world_map(cumulative_positive, locations='Country', z='Total_Cases', title='Reported Covid-19 Cases', col_bar_title='Reported Covid-19 Cases', figname='world_positive_map.html')
+plotly_world_map(cumulative_death, locations='Country', z='Total_Cases', title='Reported Covid-19 Death', col_bar_title='Reported Covid-19 Death', figname='world_death_map.html')
+plotly_world_map(cumulative_recovered, locations='Country', z='Total_Cases', title='Reported Covid-19 Recovered', col_bar_title='Reported Covid-19 Recovered', figname='world_recovered_map.html')
